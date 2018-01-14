@@ -69,6 +69,7 @@ FileHeader::~FileHeader()
 bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
+	int remainSectors;
     numBytes = fileSize;
     numSectors  = divRoundUp(fileSize, SectorSize);
     if (freeMap->NumClear() < numSectors)
@@ -79,6 +80,19 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	// since we checked that there was enough free space,
 	// we expect this to succeed
 	ASSERT(dataSectors[i] >= 0);
+    }
+
+    // MP4 
+    if(numSectors > NumDirect){
+    	remainSectors = numSectors - NumDirect;
+    	numNextHeader = freeMap->FindAndSet();	// Allocate next file header to a new sector
+    	ASSERT(numNextHeader >= 0);
+
+    	FileHeader* hdr = new FileHeader;
+    	if(hdr->Allocate(freeMap, remainSectors * SectorSize)){
+    		hdr->WriteBack(numNextHeader);
+    	}
+    	delete hdr;
     }
     return TRUE;
 }
