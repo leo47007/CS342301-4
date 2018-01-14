@@ -254,6 +254,37 @@ Interrupt::CreateFile(char *filename)
     return kernel->CreateFile(filename);
 }
 #endif
+//copy from MP1
+OpenFileId
+Interrupt::OpenFile(char *filename)
+{
+    return kernel->OpenFile(filename);
+}
+
+int
+Interrupt::WriteFile(char *buffer, int size, OpenFileId id)
+{
+    return kernel->WriteFile(buffer, size, id);
+}
+
+int
+Interrupt::ReadFile(char *buffer, int size, OpenFileId id)
+{
+    return kernel->ReadFile(buffer, size, id);
+}
+
+int
+Interrupt::CloseFile(OpenFileId id)
+{
+    return kernel->CloseFile(id);
+} 
+//copy from MP1
+
+int
+Interrupt::CreateFile(char *filename, int size)  //MP4 add
+{
+    return kernel->CreateFile(filename, size);
+}
 
 //----------------------------------------------------------------------
 // Interrupt::Schedule

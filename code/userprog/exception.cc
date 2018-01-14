@@ -74,6 +74,79 @@ ExceptionHandler(ExceptionType which)
 			SysHalt();
 			ASSERTNOTREACHED();
 			break;
+//copy from MP1
+        case SC_Open:
+            val = kernel->machine->ReadRegister(4);
+            {
+            	char *filename = &(kernel->machine->mainMemory[val]);
+            	OpenFileId id = SysOpen(filename);
+            	kernel->machine->WriteRegister(2, id);
+            }
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+            break;
+        case SC_Write:  
+            val = kernel->machine->ReadRegister(4);
+            {
+            	char *buffer = &(kernel->machine->mainMemory[val]) ;
+                int size = kernel->machine->ReadRegister(5);
+                OpenFileId id = kernel->machine->ReadRegister(6);
+            	int write = SysWrite(buffer, size, id);
+            	kernel->machine->WriteRegister(2, write);
+            }
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+            break;
+        case SC_Read:
+            val = kernel->machine->ReadRegister(4);
+            {
+            	char *buffer = &(kernel->machine->mainMemory[val]) ;
+                int size = kernel->machine->ReadRegister(5);
+                OpenFileId id = kernel->machine->ReadRegister(6);
+            	int read = SysRead(buffer, size, id);
+            	kernel->machine->WriteRegister(2, read);
+            }
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+            break;
+        case SC_Close:
+            val = kernel->machine->ReadRegister(4);
+            {
+            	int close = SysClose(val);
+            	kernel->machine->WriteRegister(2, close);
+            }
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+            break;
+//copy from MP1
+//MP4 add
+		case SC_Create:
+			val = kernel->machine->ReadRegister(4);
+			{
+				int size = kernel->machine->ReadRegister(5);
+			    char *filename = &(kernel->machine->mainMemory[val]);
+			    status = SysCreate(filename, size);
+			    kernel->machine->WriteRegister(2, (int) status);
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+            break; 
+//MP4 add       
 		#ifdef FILESYS_STUB
 		case SC_Create:
 			val = kernel->machine->ReadRegister(4);

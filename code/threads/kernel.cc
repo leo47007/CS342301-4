@@ -335,4 +335,28 @@ int Kernel::CreateFile(char *filename)
 	return fileSystem->Create(filename);
 }
 #endif
+//MP4 add
+int Kernel::CreateFile(char *filename, int size)
+{
+    return fileSystem->Create(filename, size);
+}
+//copy from MP1
+OpenFileId Kernel::OpenFile(char *filename)
+{
+    return fileSystem->Open_in_filesys(filename);    
+}
+int Kernel::WriteFile(char *buffer, int size, OpenFileId id)
+{
+    return fileSystem->Write_in_filesys(buffer, size, id); 
+}
+
+int Kernel::ReadFile(char *buffer, int size, OpenFileId id)
+{
+    return fileSystem->Read_in_filesys(buffer, size, id);  
+}
+
+int Kernel::CloseFile(OpenFileId id)
+{
+    return fileSystem->Close_in_filesys(id);  
+} 
 

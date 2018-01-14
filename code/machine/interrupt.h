@@ -98,6 +98,13 @@ class Interrupt {
 	#ifdef FILESYS_STUB
 	int CreateFile(char *filename);
 	#endif 
+    int CreateFile(char *filename, int size); // MP4 add
+    //copy from MP1
+    OpenFileId OpenFile(char *filename);
+    int WriteFile(char *buffer, int size, OpenFileId id);
+    int ReadFile(char *buffer, int size, OpenFileId id);
+    int CloseFile(OpenFileId id);  
+    //copy from MP1
 
     void YieldOnReturn();	// cause a context switch on return 
 				// from an interrupt handler

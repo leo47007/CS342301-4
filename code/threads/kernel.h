@@ -52,6 +52,13 @@ class Kernel {
 	int CreateFile(char* filename); // fileSystem call
 	#endif
 
+    int CreateFile(char* filename, int size); // MP4 add
+    //copy from MP1 
+    OpenFileId OpenFile(char* filename);
+    int WriteFile(char *buffer, int size, OpenFileId id);
+    int ReadFile(char *buffer, int size, OpenFileId id);
+    int CloseFile(OpenFileId id);
+    //copy from MP1 
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
 

@@ -36,5 +36,33 @@ int SysCreate(char *filename)
 }
 #endif
 
+//copy from MP1
+OpenFileId SysOpen(char *filename)
+{
+	return kernel->interrupt->OpenFile(filename);
+}
 
+int SysWrite(char *buffer, int size, OpenFileId id)
+{
+    return kernel->interrupt->WriteFile(buffer, size, id);
+}
+
+int SysRead(char *buffer, int size, OpenFileId id)
+{
+    return kernel->interrupt->ReadFile(buffer, size, id);
+}
+
+int SysClose(OpenFileId id)
+{
+    return kernel->interrupt->CloseFile(id);
+}  
+
+//MP4 add 
+int SysCreate(char *filename, int size)
+{
+	// return value
+	// 1: success
+	// 0: failed
+	return kernel->interrupt->CreateFile(filename, size);
+}
 #endif /* ! __USERPROG_KSYSCALL_H__ */
