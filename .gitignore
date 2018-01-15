@@ -1,0 +1,6 @@
+#compile object file
+*.o
+*.d
+*.coff
+.DS_Store
+usr/

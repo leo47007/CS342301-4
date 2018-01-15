@@ -80,14 +80,16 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	int exceed=0;
     numBytes = fileSize;
 	numSectors = divRoundUp(fileSize, SectorSize);
-    if (freeMap->NumClear() < numSectors)
-	return FALSE;		// not enough space
+	cout <<"Allocate: file size = "<< fileSize <<"\n";
+
 
 	if(numSectors > NumDirect){
     	numBytes = NumDirect * SectorSize;
     	numSectors = NumDirect;
     	exceed = 1;
 	}
+    if (freeMap->NumClear() < numSectors)
+	return FALSE;		// not enough space
 
     //numSectors  = divRoundUp(fileSize, SectorSize);
 
@@ -97,22 +99,36 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	// since we checked that there was enough free space,
 	// we expect this to succeed
 	ASSERT(dataSectors[i] >= 0);
+		/*char tmp[SectorSize];	for(int i=0 ; i<SectorSize ; i++)	tmp[i] = 0;
+		kernel->synchDisk->WriteSector(dataSectors[i], tmp);*/
     }
     // MP4 
     if(exceed){
     	remainSectors = divRoundUp(fileSize, SectorSize) - NumDirect;
     	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
+        cout << "Allocate: next header id = " << nextHeaderID <<"\n";
+
     	ASSERT(nextHeaderID >= 0);
     	cout << "need new header" <<"\n";
     	nextHeader = new FileHeader;
-    	nextHeader->Allocate(freeMap, remainSectors * SectorSize);
+		nextHeader->Allocate(freeMap, remainSectors * SectorSize);
+    	/*if(nextHeader->Allocate(freeMap, remainSectors * SectorSize)){
+    		nextHeader->WriteBack(nextHeaderID);
+    	}*/
 
     	
     }
+    cout << "-------------\n";
+    cout <<"Allocate: numBytes = "<< numBytes <<"\n";
+    cout <<"Allocate: numSectors = "<< numSectors <<"\n";
+    cout <<"Allocate: nextHeaderID = "<< nextHeaderID <<"\n";
+    cout << "-------------\n";
+
 
 
     return TRUE;
 }
+
 
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
@@ -146,8 +162,10 @@ FileHeader::FetchFrom(int sector)
     // kernel->synchDisk->ReadSector(sector, (char *)this);
 	int offset;
 	char buf[SectorSize];
+    cout << "FetchFrom: sector = " << sector <<"\n";
+
 	kernel->synchDisk->ReadSector(sector, buf);
-    cout << "Fetch data" <<"\n";
+    //cout << "FetchFrom: Fetch data" <<"\n";
 
 	/* disk head */
 	memcpy(&numBytes, buf, sizeof(numBytes));
@@ -158,14 +176,22 @@ FileHeader::FetchFrom(int sector)
 	offset += sizeof(nextHeaderID);
 	memcpy(dataSectors, buf + offset, NumDirect * sizeof(int));
 	//FileHeader* hdr = new FileHeader;
-	if(nextHeaderID != -1){
+	if(0 <= nextHeaderID && nextHeaderID <1024){
 		nextHeader = new FileHeader;
-    	cout << "fetch new header" <<"\n";
+    	cout << "FetchFrom: next header id = " << nextHeaderID <<"\n";
+
+    	cout << "FetchFrom: fetch new header" <<"\n";
+
 		nextHeader->FetchFrom(nextHeaderID);
 
 		//hdr->FetchFrom(nextHeaderID);
 		//delete hdr;
 	}
+    cout << "-------------\n";
+    cout <<"FetchFrom: numBytes = "<< numBytes <<"\n";
+    cout <<"FetchFrom: numSectors = "<< numSectors <<"\n";
+    cout <<"FetchFrom: nextHeaderID = "<< nextHeaderID <<"\n";
+    cout << "-------------\n";
 	/*
 		MP4 Hint:
 		After you add some in-core informations, you will need to rebuild the header's structure
@@ -195,7 +221,11 @@ FileHeader::WriteBack(int sector)
 	offset += sizeof(nextHeaderID);
 	memcpy(buf + offset, dataSectors, NumDirect * sizeof(int));
 	kernel->synchDisk->WriteSector(sector, buf); 
-
+    cout << "-------------\n";
+    cout <<"WriteBack: numBytes = "<< numBytes <<"\n";
+    cout <<"WriteBack: numSectors = "<< numSectors <<"\n";
+    cout <<"WriteBack: nextHeaderID = "<< nextHeaderID <<"\n";
+    cout << "-------------\n";
 	if(nextHeaderID != -1){
 		nextHeader->WriteBack(nextHeaderID);
 	}	
