@@ -209,7 +209,7 @@ FileHeader::ByteToSector(int offset)
 {
 	index = offset / SectorSize;
 	if(index > NumDirect){
-		nextHeader->ByteToSector((index-NumDirect) * SectorSize);
+		return nextHeader->ByteToSector((index-NumDirect) * SectorSize);
 	}
 	else{
     	return(dataSectors[index]);
