@@ -37,6 +37,7 @@
 #include "list.h"
 #include "callback.h"
 
+typedef int OpenFileId;
 // Interrupts can be disabled (IntOff) or enabled (IntOn)
 enum IntStatus { IntOff, IntOn };
 
