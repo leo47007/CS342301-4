@@ -245,11 +245,54 @@ FileSystem::Open(char *name)
     sector = directory->Find(name); 
     if (sector >= 0){
         openFile = new OpenFile(sector);    // name was found in directory
-        openfileTable[tableTop++] = openFile; //record the opened file in a table  
+        openFileTable[tableTop++] = openFile; //record the opened file in a table  
     } 		
 
     delete directory;
     return openFile;				// return NULL if not found
+}
+
+OpenFileId
+FileSystem::Open_in_filesys(char *name)
+{
+    OpenFile* file = Open(filename);
+    if(file == NULL) 
+        return -1;
+    for(int i = 0 ; i < openFileTableSize ; i++)
+    {
+        if(!openFileTable[i])
+        {
+            openFileTable[i] = file;
+            return i;
+        }
+    }
+}
+
+int 
+FileSystem::Write_in_filesys(char *buffer, int size, OpenFileId id)
+{
+    if(!openFileTable[id])
+      return -1;
+    else
+      return openFileTable[id]->Write(buffer, size);
+}
+
+int 
+FileSystem::Read_in_filesys(char *buffer, int size, OpenFileId id)
+{
+    if(!openFileTable[id])
+      return -1;
+    else
+      return openFileTable[id]->Read(buffer, size);
+}
+
+int 
+FileSystem::Close_in_filesys(OpenFileId id)
+{
+    if(openFileTable[id] == NULL)
+      return 0;
+    openFileTable[id] == NULL;
+    return 1;
 }
 
 //----------------------------------------------------------------------

@@ -343,7 +343,7 @@ int Kernel::CreateFile(char *filename, int size)
 
 OpenFileId Kernel::OpenFile(char *filename)
 {
-    return fileSystem->Open(filename);    
+    return fileSystem->Open_in_filesys(filename);
 }
 int Kernel::WriteFile(char *buffer, int size, OpenFileId id)
 {
