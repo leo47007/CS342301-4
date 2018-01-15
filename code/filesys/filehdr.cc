@@ -207,7 +207,7 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
-	index = offset / SectorSize;
+	int index = offset / SectorSize;
 	if(index > NumDirect){
 		return nextHeader->ByteToSector((index-NumDirect) * SectorSize);
 	}
