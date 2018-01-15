@@ -37,6 +37,7 @@
 #include "sysdep.h"
 #include "openfile.h"
 
+#define tableSize 10
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -93,6 +94,8 @@ class FileSystem {
 					// represented as a file
    OpenFile* directoryFile;		// "Root" directory -- list of 
 					// file names, represented as a file
+   OpenFile* openFileTable[tableSize];
+   int tableTop;
 };
 
 #endif // FILESYS

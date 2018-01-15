@@ -243,8 +243,11 @@ FileSystem::Open(char *name)
     DEBUG(dbgFile, "Opening file" << name);
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
-    if (sector >= 0) 		
-	openFile = new OpenFile(sector);	// name was found in directory 
+    if (sector >= 0){
+        openFile = new OpenFile(sector);    // name was found in directory
+        openfileTable[tableTop++] = openFile; //record the opened file in a table  
+    } 		
+
     delete directory;
     return openFile;				// return NULL if not found
 }
