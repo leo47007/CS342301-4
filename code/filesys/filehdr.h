@@ -76,11 +76,14 @@ class FileHeader {
 		In-core part - none
 		
 	*/
-    FileHeader* nextHeader; /* in core */
-	int numNextHeader;        // record the sector of next file header. link-list structure
+
     int numBytes;			// Number of bytes in the file
     int numSectors;			// Number of data sectors in the file
     int dataSectors[NumDirect];		// Disk sector numbers for each data 
+
+	int nextHeaderID;        // record the sector of next file header. link-list structure
+    FileHeader* nextHeader; /* in core */
+
 					// block in the file
 };
 
