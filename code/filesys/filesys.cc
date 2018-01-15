@@ -253,7 +253,7 @@ FileSystem::Open(char *name)
 OpenFileId
 FileSystem::Open_in_filesys(char *name)
 {
-    OpenFile* file = this->Open(filename);
+    OpenFile* file = this->Open(name);
     if(file == NULL) 
         return -1;
     for(int i = 0 ; i < openFileTableSize ; i++)
