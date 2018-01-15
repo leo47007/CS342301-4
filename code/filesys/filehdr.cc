@@ -77,30 +77,40 @@ bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
 	int remainSectors;
+	int exceed=0;
     numBytes = fileSize;
-    numSectors  = divRoundUp(fileSize, SectorSize);
+	numSectors = divRoundUp(fileSize, SectorSize);
     if (freeMap->NumClear() < numSectors)
 	return FALSE;		// not enough space
 
-    // MP4 
-    if(numSectors > NumDirect){
-    	remainSectors = numSectors - NumDirect;
-    	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
-    	ASSERT(nextHeaderID >= 0);
-
-    	nextHeader = new FileHeader;
-    	nextHeader->Allocate(freeMap, remainSectors * SectorSize);
+	if(numSectors > NumDirect){
     	numBytes = NumDirect * SectorSize;
     	numSectors = NumDirect;
-    	
-    }
+    	exceed = 1;
+	}
 
+    //numSectors  = divRoundUp(fileSize, SectorSize);
+
+	
     for (int i = 0; i < numSectors; i++) {
 	dataSectors[i] = freeMap->FindAndSet();
 	// since we checked that there was enough free space,
 	// we expect this to succeed
 	ASSERT(dataSectors[i] >= 0);
     }
+    // MP4 
+    if(exceed){
+    	remainSectors = divRoundUp(fileSize, SectorSize) - NumDirect;
+    	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
+    	ASSERT(nextHeaderID >= 0);
+    	cout << "need new header" <<"\n";
+    	nextHeader = new FileHeader;
+    	nextHeader->Allocate(freeMap, remainSectors * SectorSize);
+
+    	
+    }
+
+
     return TRUE;
 }
 
@@ -115,6 +125,7 @@ void
 FileHeader::Deallocate(PersistentBitmap *freeMap)
 {
 	if(nextHeader != NULL)	nextHeader->Deallocate(freeMap);
+	cout << "in deallocate"<< "\n";
 
     for (int i = 0; i < numSectors; i++) {
 	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
@@ -136,8 +147,9 @@ FileHeader::FetchFrom(int sector)
 	int offset;
 	char buf[SectorSize];
 	kernel->synchDisk->ReadSector(sector, buf);
+    cout << "Fetch data" <<"\n";
 
-	/* dick head */
+	/* disk head */
 	memcpy(&numBytes, buf, sizeof(numBytes));
 	offset = sizeof(numBytes);
 	memcpy(&numSectors, buf + offset, sizeof(numSectors));	
@@ -145,10 +157,14 @@ FileHeader::FetchFrom(int sector)
 	memcpy(&nextHeaderID, buf + offset, sizeof(nextHeaderID)); 
 	offset += sizeof(nextHeaderID);
 	memcpy(dataSectors, buf + offset, NumDirect * sizeof(int));
-	
+	//FileHeader* hdr = new FileHeader;
 	if(nextHeaderID != -1){
 		nextHeader = new FileHeader;
+    	cout << "fetch new header" <<"\n";
 		nextHeader->FetchFrom(nextHeaderID);
+
+		//hdr->FetchFrom(nextHeaderID);
+		//delete hdr;
 	}
 	/*
 		MP4 Hint:
