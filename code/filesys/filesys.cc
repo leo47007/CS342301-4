@@ -255,7 +255,7 @@ FileSystem::Open(char *name)
 OpenFileId
 FileSystem::Open_in_filesys(char *name)
 {
-    OpenFile* file = Open(filename);
+    OpenFile* file = this->Open(filename);
     if(file == NULL) 
         return -1;
     for(int i = 0 ; i < openFileTableSize ; i++)
@@ -289,9 +289,11 @@ FileSystem::Read_in_filesys(char *buffer, int size, OpenFileId id)
 int 
 FileSystem::Close_in_filesys(OpenFileId id)
 {
-    if(openFileTable[id] == NULL)
+    if(!openFileTable[id])
       return 0;
-    openFileTable[id] == NULL;
+    OpenFile* file = openFileTable[id];
+    delete file;
+    openFileTable[id] = NULL;
     return 1;
 }
 
