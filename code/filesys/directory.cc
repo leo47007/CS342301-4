@@ -165,6 +165,7 @@ Directory::Remove(char *name)
     if (i == -1)
 	return FALSE; 		// name not in directory
     table[i].inUse = FALSE;
+    table[i].isDir = FALSE;
     return TRUE;	
 }
 
@@ -183,7 +184,8 @@ Directory::List()
         {
             if(table[i].isDir)
             {
-                printf("in Directory::List()\n");
+                cout << "table[i].isDir = "<< table[i].isDir<<"\n";
+                //printf("in Directory::List()\n");
                 printf("[%d] %s D\n", num,table[i].name);
             }
             else

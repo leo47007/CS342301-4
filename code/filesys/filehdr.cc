@@ -104,10 +104,10 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
     if(exceed){
     	remainSize = fileSize - MaxFileSize;
     	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
-        cout << "Allocate: next header id = " << nextHeaderID <<"\n";
+        //cout << "Allocate: next header id = " << nextHeaderID <<"\n";
 
     	ASSERT(nextHeaderID >= 0);
-    	cout << "need new header" <<"\n";
+    	//cout << "need new header" <<"\n";
     	nextHeader = new FileHeader;
 		nextHeader->Allocate(freeMap, remainSize);
     	/*if(nextHeader->Allocate(freeMap, remainSectors * SectorSize)){

@@ -211,6 +211,7 @@ FileSystem::FindDirectory(char *pathname){
 
     for(int i=0; i<dirlayer; i++){
         sector = subDirectory->Find(path[i]);
+        cout << "path[i]: "<< path[i] << "\n";
         if(sector == -1){
             break;
         }
@@ -219,6 +220,8 @@ FileSystem::FindDirectory(char *pathname){
             subDirectory->FetchFrom(subDirectoryFile);
         }
     }
+    cout << "filename: "<< filename << "\n";
+
     strcpy(pathname, filename);    // modify the pathname to only last name
     delete subDirectory;
     return subDirectoryFile;
@@ -234,6 +237,7 @@ FileSystem::Create(char *pathname, int initialSize)
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
+
     int sector;
     bool success;
 
@@ -247,7 +251,7 @@ FileSystem::Create(char *pathname, int initialSize)
     char name[256];
     strcpy(name, pathname); /* prevent pathName being modified */
     OpenFile* subDirectory = FindDirectory(name); /* name will be cut to file name */
-    if(subDirectory == NULL)  return FALSE; /* Directory file not found */
+    //if(subDirectory == NULL)  return FALSE; /* Directory file not found */
     directory->FetchFrom(subDirectory);
 
 
@@ -275,6 +279,8 @@ FileSystem::Create(char *pathname, int initialSize)
     	}
         delete freeMap;
     }
+    if(subDirectory!=NULL && subDirectory!= directoryFile) delete subDirectory;
+
     delete directory;
     return success;
 }
@@ -284,6 +290,7 @@ FileSystem::CreateDirectory(char *pathname){
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
+
     int sector;
     bool success;
     int initialSize = DirectoryFileSize;
@@ -316,14 +323,22 @@ FileSystem::CreateDirectory(char *pathname){
             else {  
                 success = TRUE;
             // everthing worked, flush all changes back to disk
+
                     hdr->WriteBack(sector);         
                     directory->WriteBack(subDirectory);
                     freeMap->WriteBack(freeMapFile);
+                    Directory* subDir = new Directory(NumDirEntries);
+                    OpenFile* subDirectoryFile = new OpenFile(sector);
+                    subDir->WriteBack(subDirectoryFile);
+                    delete subDir;
+                    if(subDirectoryFile!=NULL && subDirectoryFile!= directoryFile) delete subDirectoryFile;
             }
                 delete hdr;
         }
         delete freeMap;
     }
+    if(subDirectory!=NULL && subDirectory!= directoryFile) delete subDirectory;
+
     delete directory;
     return success;    
 } 
@@ -344,20 +359,22 @@ FileSystem::Open(char *pathname)
     Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
     int sector;
+    directory->FetchFrom(directoryFile);
 
     DEBUG(dbgFile, "Opening file" << pathname);
     char name[256];
     strcpy(name, pathname); // prevent pathName being modified 
     OpenFile* subDirectory = FindDirectory(name); // name will be cut to file name 
-    if(subDirectory == NULL)  return FALSE; // Directory file not found 
+    //if(subDirectory == NULL)  return FALSE; // Directory file not found 
     directory->FetchFrom(subDirectory);
 
-    //directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0)
         openFile = new OpenFile(sector);    // name was found in directory
 	
     delete directory;
+    if(subDirectory!=NULL && subDirectory!= directoryFile) delete subDirectory;
+
     return openFile;				// return NULL if not found
 }
 
@@ -437,6 +454,9 @@ FileSystem::Remove(char *pathname)
 
     //directory->FetchFrom(directoryFile);
     sector = directory->Find(name);
+    cout << "Remove: name = " << name <<"\n";
+    cout << "Remove: sector= " << sector <<"\n";
+
     if (sector == -1) {
        delete directory;
        return FALSE;			 // file not found 
@@ -452,6 +472,7 @@ FileSystem::Remove(char *pathname)
 
     freeMap->WriteBack(freeMapFile);		// flush to disk
     directory->WriteBack(directoryFile);        // flush to disk
+    if(subDirectory!=NULL && subDirectory!= directoryFile) delete subDirectory;
     delete fileHdr;
     delete directory;
     delete freeMap;
@@ -472,6 +493,7 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
     int sector;
     if(strcmp(listDirectoryName, "/") == 0)
     {
+        cout << "List: in /"<< "\n";
         directory->FetchFrom(directoryFile);
         if(recursiveListFlag)
             directory->RecursiveList(depth);  
@@ -480,6 +502,7 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
     }
     else
     {
+        cout << "List: Not in /"<< "\n";
         char listDirectoryNameTemp[256];
         strcpy(listDirectoryNameTemp, listDirectoryName);
 
@@ -497,7 +520,9 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
         else
             targetDir->List();
         delete directory;
-        delete tempDir;
+        if(tempDir!=NULL && tempDir!= directoryFile) delete tempDir;
+
+        //delete tempDir;
         delete targetDir;
         delete file;
     }
