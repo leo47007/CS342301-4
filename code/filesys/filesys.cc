@@ -62,7 +62,7 @@
 // supports extensible files, the directory size sets the maximum number 
 // of files that can be loaded onto the disk.
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
-#define NumDirEntries 		10
+#define NumDirEntries 		64
 #define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
 
 //----------------------------------------------------------------------
@@ -229,7 +229,7 @@ FindDirectory(char *pathname){
 
 
 bool
-FileSystem::Create(char *name, int initialSize)
+FileSystem::Create(char *pathname, int initialSize)
 {
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -241,6 +241,15 @@ FileSystem::Create(char *name, int initialSize)
 
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
+
+    /* MP4 */
+    /* Find the directory containing the target file */
+    char name[256];
+    strcpy(name, pathName); /* prevent pathName being modified */
+    OpenFile* subDirectory = FindSubDirectory(name); /* name will be cut to file name */
+    if(subDirectory == NULL)  return FALSE; /* Directory file not found */
+    directory->FetchFrom(subDirectory);
+
 
     if (directory->Find(name) != -1)
       success = FALSE;			// file is already in directory
@@ -259,7 +268,7 @@ FileSystem::Create(char *name, int initialSize)
     	    	success = TRUE;
     		// everthing worked, flush all changes back to disk
         	    	hdr->WriteBack(sector); 		
-        	    	directory->WriteBack(directoryFile);
+        	    	directory->WriteBack(subDirectory);
         	    	freeMap->WriteBack(freeMapFile);
     	    }
                 delete hdr;
@@ -269,6 +278,55 @@ FileSystem::Create(char *name, int initialSize)
     delete directory;
     return success;
 }
+
+bool
+CreateDirectory(char *pathname){
+    Directory *directory;
+    PersistentBitmap *freeMap;
+    FileHeader *hdr;
+    int sector;
+    bool success;
+    int initialSize = DirectoryFileSize;
+    DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
+
+    directory = new Directory(NumDirEntries);
+    directory->FetchFrom(directoryFile);
+
+    /* MP4 */
+    /* Find the directory containing the target file */
+    char name[256];
+    strcpy(name, pathName); /* prevent pathName being modified */
+    OpenFile* subDirectory = FindSubDirectory(name); /* name will be cut to file name */
+    if(subDirectory == NULL)  return FALSE; /* Directory file not found */
+    directory->FetchFrom(subDirectory);
+
+    if (directory->Find(name) != -1)
+      success = FALSE;          // file is already in directory
+    else {  
+        freeMap = new PersistentBitmap(freeMapFile,NumSectors);
+        sector = freeMap->FindAndSet(); // find a sector to hold the file header
+        if (sector == -1)       
+            success = FALSE;        // no free block for file header 
+        else if (!directory->Add(name, sector))
+            success = FALSE;    // no space in directory
+        else {
+                hdr = new FileHeader;
+            if (!hdr->Allocate(freeMap, initialSize))
+                    success = FALSE;    // no space on disk for data
+            else {  
+                success = TRUE;
+            // everthing worked, flush all changes back to disk
+                    hdr->WriteBack(sector);         
+                    directory->WriteBack(subDirectory);
+                    freeMap->WriteBack(freeMapFile);
+            }
+                delete hdr;
+        }
+        delete freeMap;
+    }
+    delete directory;
+    return success;    
+} 
 
 //----------------------------------------------------------------------
 // FileSystem::Open
