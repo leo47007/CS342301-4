@@ -474,9 +474,9 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
     {
         directory->FetchFrom(directoryFile);
         if(recursiveListFlag)
-            directory->List();
+            directory->RecursiveList(depth);  
         else
-            directory->RecursiveList(depth);        
+            directory->List();      
     }
     else
     {
@@ -493,9 +493,9 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
         targetDir->FetchFrom(file);
      
         if(recursiveListFlag)
-            targetDir->List();
+            targetDir->RecursiveList(depth);  
         else
-            targetDir->RecursiveList(depth);
+            targetDir->List();
         delete directory;
         delete tempDir;
         delete targetDir;
