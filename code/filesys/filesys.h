@@ -83,13 +83,13 @@ class FileSystem {
     bool CreateDirectory(char *pathname);	
 					// Create a file (UNIX creat)
 
-    OpenFile* Open(char *name); 	// Open a file (UNIX open)
+    OpenFile* Open(char *pathname); 	// Open a file (UNIX open)
     OpenFileId Open_in_filesys(char *name);
     int Write_in_filesys(char *buffer, int size, OpenFileId id);
     int Read_in_filesys(char *buffer, int size, OpenFileId id);
     int Close_in_filesys(OpenFileId id);
 
-    bool Remove(char *name);  		// Delete a file (UNIX unlink)
+    bool Remove(char *pathname);  		// Delete a file (UNIX unlink)
 
     void List(bool recursiveListFlag, char* listDirectoryName);			// List all the files in the file system
 

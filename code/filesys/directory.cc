@@ -130,13 +130,14 @@ Directory::Find(char *name)
 //----------------------------------------------------------------------
 
 bool
-Directory::Add(char *name, int newSector)
+Directory::Add(char *name, int newSector, bool isDir)
 { 
     if (FindIndex(name) != -1)
 	return FALSE;
 
     for (int i = 0; i < tableSize; i++)
         if (!table[i].inUse) {
+            table[i].isDir = isDir;
             table[i].inUse = TRUE;
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;

@@ -258,7 +258,7 @@ FileSystem::Create(char *pathname, int initialSize)
         sector = freeMap->FindAndSet();	// find a sector to hold the file header
     	if (sector == -1) 		
             success = FALSE;		// no free block for file header 
-        else if (!directory->Add(name, sector))
+        else if (!directory->Add(name, sector, FALSE))
             success = FALSE;	// no space in directory
     	else {
         	    hdr = new FileHeader;
@@ -295,9 +295,9 @@ CreateDirectory(char *pathname){
     /* MP4 */
     /* Find the directory containing the target file */
     char name[256];
-    strcpy(name, pathName); /* prevent pathName being modified */
-    OpenFile* subDirectory = FindSubDirectory(name); /* name will be cut to file name */
-    if(subDirectory == NULL)  return FALSE; /* Directory file not found */
+    strcpy(name, pathName); // prevent pathName being modified 
+    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    if(subDirectory == NULL)  return FALSE; // Directory file not found 
     directory->FetchFrom(subDirectory);
 
     if (directory->Find(name) != -1)
@@ -307,7 +307,7 @@ CreateDirectory(char *pathname){
         sector = freeMap->FindAndSet(); // find a sector to hold the file header
         if (sector == -1)       
             success = FALSE;        // no free block for file header 
-        else if (!directory->Add(name, sector))
+        else if (!directory->Add(name, sector, TRUE))
             success = FALSE;    // no space in directory
         else {
                 hdr = new FileHeader;
@@ -339,14 +339,20 @@ CreateDirectory(char *pathname){
 //----------------------------------------------------------------------
 
 OpenFile *
-FileSystem::Open(char *name)
+FileSystem::Open(char *pathname)
 { 
     Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
     int sector;
 
     DEBUG(dbgFile, "Opening file" << name);
-    directory->FetchFrom(directoryFile);
+    char name[256];
+    strcpy(name, pathName); // prevent pathName being modified 
+    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    if(subDirectory == NULL)  return FALSE; // Directory file not found 
+    directory->FetchFrom(subDirectory);
+
+    //directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0)
         openFile = new OpenFile(sector);    // name was found in directory
@@ -415,7 +421,7 @@ FileSystem::Close_in_filesys(OpenFileId id)
 //----------------------------------------------------------------------
 
 bool
-FileSystem::Remove(char *name)
+FileSystem::Remove(char *pathname)
 { 
     Directory *directory;
     PersistentBitmap *freeMap;
@@ -423,7 +429,13 @@ FileSystem::Remove(char *name)
     int sector;
     
     directory = new Directory(NumDirEntries);
-    directory->FetchFrom(directoryFile);
+    char name[256];
+    strcpy(name, pathName); // prevent pathName being modified 
+    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    if(subDirectory == NULL)  return FALSE; // Directory file not found 
+    directory->FetchFrom(subDirectory);
+
+    //directory->FetchFrom(directoryFile);
     sector = directory->Find(name);
     if (sector == -1) {
        delete directory;
