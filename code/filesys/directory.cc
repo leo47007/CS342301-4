@@ -182,7 +182,10 @@ Directory::List()
         if (table[i].inUse)
         {
             if(table[i].isDir)
+            {
+                printf("in Directory::List()\n");
                 printf("[%d] %s D\n", num,table[i].name);
+            }
             else
                 printf("[%d] %s F\n", num,table[i].name);
             num++;
