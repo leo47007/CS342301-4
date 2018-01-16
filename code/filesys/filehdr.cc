@@ -1,17 +1,17 @@
-// filehdr.cc 
+// filehdr.cc
 //	Routines for managing the disk file header (in UNIX, this
 //	would be called the i-node).
 //
-//	The file header is used to locate where on disk the 
+//	The file header is used to locate where on disk the
 //	file's data is stored.  We implement this as a fixed size
-//	table of pointers -- each entry in the table points to the 
+//	table of pointers -- each entry in the table points to the
 //	disk sector containing that portion of the file data
-//	(in other words, there are no indirect or doubly indirect 
+//	(in other words, there are no indirect or doubly indirect
 //	blocks). The table size is chosen so that the file header
-//	will be just big enough to fit in one disk sector, 
+//	will be just big enough to fit in one disk sector,
 //
-//      Unlike in a real system, we do not keep track of file permissions, 
-//	ownership, last modification date, etc., in the file header. 
+//      Unlike in a real system, we do not keep track of file permissions,
+//	ownership, last modification date, etc., in the file header.
 //
 //	A file header can be initialized in two ways:
 //	   for a new file, by modifying the in-memory data structure
@@ -19,7 +19,7 @@
 //	   for a file already on disk, by reading the file header from disk
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
@@ -28,7 +28,7 @@
 #include "debug.h"
 #include "synchdisk.h"
 #include "main.h"
-
+#include "disk.h"
 //----------------------------------------------------------------------
 // MP4 mod tag
 // FileHeader::FileHeader
@@ -38,12 +38,13 @@
 //----------------------------------------------------------------------
 FileHeader::FileHeader()
 {
+	/* MP4 */
+	nextHeaderID = -1;
+	nextHeader = NULL;
+
 	numBytes = -1;
 	numSectors = -1;
 	memset(dataSectors, -1, sizeof(dataSectors));
-
-	nextHeaderID = -1;
-	nextHeader = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -55,11 +56,9 @@ FileHeader::FileHeader()
 //----------------------------------------------------------------------
 FileHeader::~FileHeader()
 {
-	// nothing to do now
-	if(nextHeader != NULL){
-		delete nextHeader;       // remove the in-core data
-	}
-
+	/* MP4 */
+	if(nextHeader != NULL)
+		delete nextHeader; /* invoke destructor of nextFileHeader recursively */
 }
 
 //----------------------------------------------------------------------
@@ -76,7 +75,7 @@ FileHeader::~FileHeader()
 bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
-	int remainSectors;
+	int remainSize;
 	int exceed=0;
     numBytes = fileSize;
 	numSectors = divRoundUp(fileSize, SectorSize);
@@ -104,14 +103,14 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
     }
     // MP4 
     if(exceed){
-    	remainSectors = divRoundUp(fileSize, SectorSize) - NumDirect;
+    	remainSize = fileSize - MaxFileSize;
     	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
         cout << "Allocate: next header id = " << nextHeaderID <<"\n";
 
     	ASSERT(nextHeaderID >= 0);
     	cout << "need new header" <<"\n";
     	nextHeader = new FileHeader;
-		nextHeader->Allocate(freeMap, remainSectors * SectorSize);
+		nextHeader->Allocate(freeMap, remainSize);
     	/*if(nextHeader->Allocate(freeMap, remainSectors * SectorSize)){
     		nextHeader->WriteBack(nextHeaderID);
     	}*/
@@ -128,7 +127,6 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 
     return TRUE;
 }
-
 
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
@@ -212,7 +210,6 @@ FileHeader::WriteBack(int sector)
 	char buf[SectorSize];
 	int offset;
 
-	/* dick head */
 	memcpy(buf, &numBytes, sizeof(numBytes));
 	offset = sizeof(numBytes);
 	memcpy(buf + offset, &numSectors, sizeof(numSectors));	
@@ -253,14 +250,13 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
+	/* MP4 */
 	int index = offset / SectorSize;
-	if(index > NumDirect){
-		return nextHeader->ByteToSector((index-NumDirect) * SectorSize);
-	}
-	else{
-    	return(dataSectors[index]);
+	if(index >= NumDirect)
+		return nextHeader->ByteToSector(offset - MaxFileSize);
+	else
+		return(dataSectors[index]);
 
-	}
 }
 
 //----------------------------------------------------------------------
@@ -303,10 +299,12 @@ FileHeader::Print()
             else
 		printf("\\%x", (unsigned char)data[j]);
 	}
-        printf("\n"); 
+        printf("\n");
     }
-    if(nextHeader != NULL){
-    	nextHeader->Print();
-    }
+
+	/* MP4 */
+	if(nextHeader != NULL)
+		nextHeader->Print();
+
     delete [] data;
 }
