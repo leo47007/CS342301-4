@@ -219,6 +219,7 @@ FindDirectory(char *pathname){
             subDirectory->FetchFrom(subDirectoryFile);
         }
     }
+    strcpy(pathname, filename);    // modify the pathname to only last name
     delete subDirectory;
     return subDirectoryFile;
 
