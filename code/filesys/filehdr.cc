@@ -79,7 +79,6 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	int exceed=0;
     numBytes = fileSize;
 	numSectors = divRoundUp(fileSize, SectorSize);
-	cout <<"Allocate: file size = "<< fileSize <<"\n";
 
 
 	if(numSectors > NumDirect){
@@ -117,11 +116,6 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 
     	
     }
-    cout << "-------------\n";
-    cout <<"Allocate: numBytes = "<< numBytes <<"\n";
-    cout <<"Allocate: numSectors = "<< numSectors <<"\n";
-    cout <<"Allocate: nextHeaderID = "<< nextHeaderID <<"\n";
-    cout << "-------------\n";
 
 
 
@@ -139,7 +133,6 @@ void
 FileHeader::Deallocate(PersistentBitmap *freeMap)
 {
 	if(nextHeader != NULL)	nextHeader->Deallocate(freeMap);
-	cout << "in deallocate"<< "\n";
 
     for (int i = 0; i < numSectors; i++) {
 	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
@@ -160,7 +153,7 @@ FileHeader::FetchFrom(int sector)
     // kernel->synchDisk->ReadSector(sector, (char *)this);
 	int offset;
 	char buf[SectorSize];
-    cout << "FetchFrom: sector = " << sector <<"\n";
+    //cout << "FetchFrom: sector = " << sector <<"\n";
 
 	kernel->synchDisk->ReadSector(sector, buf);
     //cout << "FetchFrom: Fetch data" <<"\n";
@@ -176,20 +169,22 @@ FileHeader::FetchFrom(int sector)
 	//FileHeader* hdr = new FileHeader;
 	if(0 <= nextHeaderID && nextHeaderID <1024){
 		nextHeader = new FileHeader;
-    	cout << "FetchFrom: next header id = " << nextHeaderID <<"\n";
+    	//cout << "FetchFrom: next header id = " << nextHeaderID <<"\n";
 
-    	cout << "FetchFrom: fetch new header" <<"\n";
+    	//cout << "FetchFrom: fetch new header" <<"\n";
 
 		nextHeader->FetchFrom(nextHeaderID);
 
 		//hdr->FetchFrom(nextHeaderID);
 		//delete hdr;
 	}
+	/*
     cout << "-------------\n";
     cout <<"FetchFrom: numBytes = "<< numBytes <<"\n";
     cout <<"FetchFrom: numSectors = "<< numSectors <<"\n";
     cout <<"FetchFrom: nextHeaderID = "<< nextHeaderID <<"\n";
     cout << "-------------\n";
+    */
 	/*
 		MP4 Hint:
 		After you add some in-core informations, you will need to rebuild the header's structure
@@ -218,11 +213,7 @@ FileHeader::WriteBack(int sector)
 	offset += sizeof(nextHeaderID);
 	memcpy(buf + offset, dataSectors, NumDirect * sizeof(int));
 	kernel->synchDisk->WriteSector(sector, buf); 
-    cout << "-------------\n";
-    cout <<"WriteBack: numBytes = "<< numBytes <<"\n";
-    cout <<"WriteBack: numSectors = "<< numSectors <<"\n";
-    cout <<"WriteBack: nextHeaderID = "<< nextHeaderID <<"\n";
-    cout << "-------------\n";
+
 	if(nextHeaderID != -1){
 		nextHeader->WriteBack(nextHeaderID);
 	}	

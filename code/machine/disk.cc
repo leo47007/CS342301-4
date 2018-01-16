@@ -117,9 +117,7 @@ Disk::ReadRequest(int sectorNumber, char* data)
 
     ASSERT(!active);				// only one request at a time
     //ASSERT((sectorNumber >= 0));
-    if(sectorNumber > NumSectors){
-        cout << "Disk: sector number" << sectorNumber <<"\n";
-    }
+
 
 
     ASSERT((sectorNumber >= 0) && (sectorNumber < NumSectors));
