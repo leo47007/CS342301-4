@@ -184,8 +184,6 @@ Directory::List()
         {
             if(table[i].isDir)
             {
-                cout << "table[i].isDir = "<< table[i].isDir<<"\n";
-                //printf("in Directory::List()\n");
                 printf("[%d] %s D\n", num,table[i].name);
             }
             else
@@ -221,6 +219,8 @@ Directory::RecursiveList(int depth)
                 subDirectory->FetchFrom(file);
                 int deeper = depth +1;
                 subDirectory->RecursiveList(deeper);
+                delete file;
+
             }
 
             num++;            
@@ -228,6 +228,7 @@ Directory::RecursiveList(int depth)
 
 
     }
+    delete subDirectory;
 }
 //----------------------------------------------------------------------
 // Directory::Print
