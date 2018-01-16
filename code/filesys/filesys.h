@@ -94,6 +94,9 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
+    OpenFile* FindDirectory(char *pathname);   // MP4 to find subdirectory
+
+
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file

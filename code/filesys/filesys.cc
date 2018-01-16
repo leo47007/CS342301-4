@@ -180,6 +180,52 @@ FileSystem::~FileSystem()
 //	"name" -- name of file to be created
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
+OpenFile*
+FindDirectory(char *pathname){
+
+
+    Directory* subDirectory = new Directory(NumDirEntries);
+    OpenFile* subDirectoryFile = directoryFile;
+    int dirlayer = 0;
+    int sector = 0;
+
+    char* token = strtok(pathname, "/");
+    char* path[256];
+    char* filename;
+
+    if(token == NULL){
+        delete subDirectory;
+        return NULL;
+    }
+    else{
+        while(token != NULL){
+            path[dirlayer] = token;
+            filename = token; // filename
+            dirlayer++;
+            token = strtok(NULL, "/");
+        }
+    }
+    dirlayer--;  
+
+    subDirectory->FetchFrom(directoryFile);
+
+    for(int i=0; i<dirlayer; i++){
+        sector = subDirectory->find(path[i]);
+        if(sector == -1){
+            break;
+        }
+        else{
+            subDirectoryFile = new OpenFile(sector);
+            subDirectory->FetchFrom(subDirectoryFile);
+        }
+    }
+    delete subDirectory;
+    return subDirectoryFile;
+
+
+}
+    
+
 
 bool
 FileSystem::Create(char *name, int initialSize)
