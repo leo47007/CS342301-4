@@ -58,7 +58,7 @@ FileHeader::~FileHeader()
 {
 	// MP4 modified
 	if(nextHeader != NULL)
-		delete nextHeader; /* invoke destructor of nextFileHeader recursively */
+		delete nextHeader; 
 }
 
 //----------------------------------------------------------------------
@@ -140,15 +140,11 @@ FileHeader::Deallocate(PersistentBitmap *freeMap)
 void
 FileHeader::FetchFrom(int sector)
 {
-    // kernel->synchDisk->ReadSector(sector, (char *)this);
 	int offset;
 	char buf[SectorSize];
-    //cout << "FetchFrom: sector = " << sector <<"\n";
 
 	kernel->synchDisk->ReadSector(sector, buf);
-    //cout << "FetchFrom: Fetch data" <<"\n";
 
-	/* disk head */
 	memcpy(&numBytes, buf, sizeof(numBytes));
 	offset = sizeof(numBytes);
 	memcpy(&numSectors, buf + offset, sizeof(numSectors));	
@@ -156,25 +152,15 @@ FileHeader::FetchFrom(int sector)
 	memcpy(&nextHeaderID, buf + offset, sizeof(nextHeaderID)); 
 	offset += sizeof(nextHeaderID);
 	memcpy(dataSectors, buf + offset, NumDirect * sizeof(int));
-	//FileHeader* hdr = new FileHeader;
 	if(nextHeaderID != -1){
 		nextHeader = new FileHeader;
-    	//cout << "FetchFrom: next header id = " << nextHeaderID <<"\n";
 
-    	//cout << "FetchFrom: fetch new header" <<"\n";
 
 		nextHeader->FetchFrom(nextHeaderID);
 
-		//hdr->FetchFrom(nextHeaderID);
-		//delete hdr;
+
 	}
-	/*
-    cout << "-------------\n";
-    cout <<"FetchFrom: numBytes = "<< numBytes <<"\n";
-    cout <<"FetchFrom: numSectors = "<< numSectors <<"\n";
-    cout <<"FetchFrom: nextHeaderID = "<< nextHeaderID <<"\n";
-    cout << "-------------\n";
-    */
+
 	/*
 		MP4 Hint:
 		After you add some in-core informations, you will need to rebuild the header's structure

@@ -18,7 +18,7 @@
 #include "pbitmap.h"
 
 #define NumDirect 	((SectorSize - 3 * sizeof(int)) / sizeof(int))
-/* MP4 -3 is for numBytes, numSectors, nextFileHeaderSector to store in one sector */
+// -3 is for numBytes, numSectors, nextHeaderID to store in one sector 
 
 #define MaxFileSize 	(NumDirect * SectorSize)
 // MP4 the max file size : SectorSize - (space for numBytes and numSectors) = numbers of data block pointer * int size
