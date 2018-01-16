@@ -398,19 +398,40 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
 {
 
     Directory *directory = new Directory(NumDirEntries); 
-    directory->FetchFrom(directoryFile);
-
-    OpenFile* target= FindDirectory(listDirectoryName);
-    if(curDirFile == NULL)  
-        return;
-    directory->FetchFrom();
-    int i = 1;
     int depth = 0;
-    if(recursiveListFlag)
-        directory->List();
+    int sector;
+    if(strcmp(listDirectoryName, "/") == 0)
+    {
+        directory->FetchFrom(directoryFile);
+        if(recursiveListFlag)
+            directory->List();
+        else
+            directory->RecursiveList(depth);        
+    }
     else
-        directory->RecursiveList(depth);
-    delete directory;
+    {
+        char listDirectoryNameTemp[256];
+        strcpy(listDirectoryNameTemp, listDirectoryName);
+
+        OpenFile* tempDir = FindDirectory(listDirectoryNameTemp);
+        //listDirectoryNameTemp then become the last file in the path
+        //  .../tempDir/listDirectoryNameTemp
+        directory->FetchFrom(tempDir);
+        sector = directory->Find(listDirectoryNameTemp);        
+        OpenFile* file = new OpenFile(sector);
+        Directory* targetDir = new Directory(NumDirEntries);
+        targetDir->FetchFrom(file);
+     
+        if(recursiveListFlag)
+            targetDir->List();
+        else
+            targetDir->RecursiveList(depth);
+        delete directory;
+        delete tempDir;
+        delete targetDir;
+        delete file;
+    }
+
 }
 
 //----------------------------------------------------------------------
