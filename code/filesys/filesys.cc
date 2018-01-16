@@ -181,7 +181,7 @@ FileSystem::~FileSystem()
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
 OpenFile*
-FindDirectory(char *pathname){
+FileSystem::FindDirectory(char *pathname){
 
 
     Directory* subDirectory = new Directory(NumDirEntries);
@@ -210,7 +210,7 @@ FindDirectory(char *pathname){
     subDirectory->FetchFrom(directoryFile);
 
     for(int i=0; i<dirlayer; i++){
-        sector = subDirectory->find(path[i]);
+        sector = subDirectory->Find(path[i]);
         if(sector == -1){
             break;
         }
@@ -237,7 +237,7 @@ FileSystem::Create(char *pathname, int initialSize)
     int sector;
     bool success;
 
-    DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
+    DEBUG(dbgFile, "Creating file " << pathname << " size " << initialSize);
 
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
@@ -245,8 +245,8 @@ FileSystem::Create(char *pathname, int initialSize)
     /* MP4 */
     /* Find the directory containing the target file */
     char name[256];
-    strcpy(name, pathName); /* prevent pathName being modified */
-    OpenFile* subDirectory = FindSubDirectory(name); /* name will be cut to file name */
+    strcpy(name, pathname); /* prevent pathName being modified */
+    OpenFile* subDirectory = FindDirectory(name); /* name will be cut to file name */
     if(subDirectory == NULL)  return FALSE; /* Directory file not found */
     directory->FetchFrom(subDirectory);
 
@@ -280,14 +280,14 @@ FileSystem::Create(char *pathname, int initialSize)
 }
 
 bool
-CreateDirectory(char *pathname){
+FileSystem::CreateDirectory(char *pathname){
     Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
     int sector;
     bool success;
     int initialSize = DirectoryFileSize;
-    DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
+    DEBUG(dbgFile, "Creating file " << pathname << " size " << initialSize);
 
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
@@ -295,8 +295,8 @@ CreateDirectory(char *pathname){
     /* MP4 */
     /* Find the directory containing the target file */
     char name[256];
-    strcpy(name, pathName); // prevent pathName being modified 
-    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    strcpy(name, pathname); // prevent pathName being modified 
+    OpenFile* subDirectory = FindDirectory(name); // name will be cut to file name 
     if(subDirectory == NULL)  return FALSE; // Directory file not found 
     directory->FetchFrom(subDirectory);
 
@@ -345,10 +345,10 @@ FileSystem::Open(char *pathname)
     OpenFile *openFile = NULL;
     int sector;
 
-    DEBUG(dbgFile, "Opening file" << name);
+    DEBUG(dbgFile, "Opening file" << pathname);
     char name[256];
-    strcpy(name, pathName); // prevent pathName being modified 
-    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    strcpy(name, pathname); // prevent pathName being modified 
+    OpenFile* subDirectory = FindDirectory(name); // name will be cut to file name 
     if(subDirectory == NULL)  return FALSE; // Directory file not found 
     directory->FetchFrom(subDirectory);
 
@@ -430,8 +430,8 @@ FileSystem::Remove(char *pathname)
     
     directory = new Directory(NumDirEntries);
     char name[256];
-    strcpy(name, pathName); // prevent pathName being modified 
-    OpenFile* subDirectory = FindSubDirectory(name); // name will be cut to file name 
+    strcpy(name, pathname); // prevent pathName being modified 
+    OpenFile* subDirectory = FindDirectory(name); // name will be cut to file name 
     if(subDirectory == NULL)  return FALSE; // Directory file not found 
     directory->FetchFrom(subDirectory);
 
