@@ -209,8 +209,8 @@ Directory::RecursiveList(int depth)
                 printf("[%d] %s D\n", num,table[i].name);
                 file = new OpenFile(table[i].sector);
                 subDirectory->FetchFrom(file);
-                depth++;
-                subDirectory->RecursiveList(depth);
+                int deeper = depth +1;
+                subDirectory->RecursiveList(deeper);
             }
             else
                 printf("[%d] %s F\n", num,table[i].name);
