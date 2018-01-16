@@ -172,11 +172,50 @@ Directory::Remove(char *name)
 void
 Directory::List()
 {
+   int num = 0;
    for (int i = 0; i < tableSize; i++)
-	if (table[i].inUse)
-	    printf("%s\n", table[i].name);
+   {
+        if (table[i].inUse)
+        {
+            if(table[i].isDir)
+                printf("[%d] %s D", num,table[i].name);
+            else
+                printf("[%d] %s F", num,table[i].name);
+            num++;
+        }   
+   }
+
 }
 
+void
+Directory::RecursiveList(int depth)
+{
+    Directory* subDirectory = new Directory(NumDirEntries);
+    OpenFile* file;    
+    int num = 0;
+
+    for(int i=0 ; i<tableSize; i++)
+    {
+        if (table[i].inUse)
+        {
+            for(int j = 0 ; j<depth ; j++)
+                printf("    ");
+            if(table[i].isDir)
+            {
+                printf("[%d] %s D", num,table[i].name);
+                file = new OpenFile(table[i].sector);
+                subDirectory = FetchFrom(file);
+                depth++;
+                subDirectory->RecursiveList(depth);
+            }
+            else
+                printf("[%d] %s F", num,table[i].name);
+            num++;            
+        }
+
+
+    }
+}
 //----------------------------------------------------------------------
 // Directory::Print
 // 	List all the file names in the directory, their FileHeader locations,
