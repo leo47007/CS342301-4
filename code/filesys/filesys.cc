@@ -347,11 +347,12 @@ FileSystem::Remove(char *name)
 //----------------------------------------------------------------------
 
 void
-FileSystem::List()
+FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
 {
-    Directory *directory = new Directory(NumDirEntries);
 
+    Directory *directory = new Directory(NumDirEntries); 
     directory->FetchFrom(directoryFile);
+
     directory->List();
     delete directory;
 }
