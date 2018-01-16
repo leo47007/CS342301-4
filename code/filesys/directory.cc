@@ -203,17 +203,21 @@ Directory::RecursiveList(int depth)
         if (table[i].inUse)
         {
             for(int j = 0 ; j<depth ; j++)
-                printf("    ");
-            if(table[i].isDir)
             {
+                printf("    ");
+            }
+            if(table[i].isDir)
                 printf("[%d] %s D\n", num,table[i].name);
+            else
+                printf("[%d] %s F\n", num,table[i].name);
+            if(table[i].isDir)
+            {    
                 file = new OpenFile(table[i].sector);
                 subDirectory->FetchFrom(file);
                 int deeper = depth +1;
                 subDirectory->RecursiveList(deeper);
             }
-            else
-                printf("[%d] %s F\n", num,table[i].name);
+
             num++;            
         }
 
