@@ -400,7 +400,16 @@ FileSystem::List(bool recursiveListFlag, char* listDirectoryName)
     Directory *directory = new Directory(NumDirEntries); 
     directory->FetchFrom(directoryFile);
 
-    directory->List();
+    OpenFile* target= FindDirectory(listDirectoryName);
+    if(curDirFile == NULL)  
+        return;
+    directory->FetchFrom();
+    int i = 1;
+    int depth = 0;
+    if(recursiveListFlag)
+        directory->List();
+    else
+        directory->RecursiveList(depth);
     delete directory;
 }
 

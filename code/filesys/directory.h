@@ -34,6 +34,7 @@ class DirectoryEntry {
     bool inUse;				// Is this directory entry in use?
     int sector;				// Location on disk to find the 
 					//   FileHeader for this file 
+    bool isDir //is this a directory or a file? (MP4)
     char name[FileNameMaxLen + 1];	// Text name for file, with +1 for 
 					// the trailing '\0'
 };
@@ -67,6 +68,8 @@ class Directory {
 
     void List();			// Print the names of all the files
 					//  in the directory
+    void RecursiveList(int depth);
+
     void Print();			// Verbose print of the contents
 					//  of the directory -- all the file
 					//  names and their contents.
