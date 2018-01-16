@@ -86,9 +86,9 @@ class FileHeader {
 					// block in the file
 
 
-    /* MP4 */
+    // MP4 modified
 	int nextHeaderID;        // record the sector of next file header. link-list structure
-    FileHeader* nextHeader; /* in core */
+    FileHeader* nextHeader;  // in core information
 };
 
 #endif // FILEHDR_H

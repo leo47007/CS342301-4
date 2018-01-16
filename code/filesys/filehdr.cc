@@ -38,7 +38,7 @@
 //----------------------------------------------------------------------
 FileHeader::FileHeader()
 {
-	/* MP4 */
+	// MP4 modified
 	nextHeaderID = -1;
 	nextHeader = NULL;
 
@@ -56,7 +56,7 @@ FileHeader::FileHeader()
 //----------------------------------------------------------------------
 FileHeader::~FileHeader()
 {
-	/* MP4 */
+	// MP4 modified
 	if(nextHeader != NULL)
 		delete nextHeader; /* invoke destructor of nextFileHeader recursively */
 }
@@ -94,27 +94,17 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	
     for (int i = 0; i < numSectors; i++) {
 	dataSectors[i] = freeMap->FindAndSet();
-	// since we checked that there was enough free space,
-	// we expect this to succeed
 	ASSERT(dataSectors[i] >= 0);
-		/*char tmp[SectorSize];	for(int i=0 ; i<SectorSize ; i++)	tmp[i] = 0;
-		kernel->synchDisk->WriteSector(dataSectors[i], tmp);*/
+
     }
     // MP4 
     if(exceed){
     	remainSize = fileSize - MaxFileSize;
     	nextHeaderID = freeMap->FindAndSet();	// Allocate next file header to a new sector
-        //cout << "Allocate: next header id = " << nextHeaderID <<"\n";
 
     	ASSERT(nextHeaderID >= 0);
-    	//cout << "need new header" <<"\n";
     	nextHeader = new FileHeader;
 		nextHeader->Allocate(freeMap, remainSize);
-    	/*if(nextHeader->Allocate(freeMap, remainSectors * SectorSize)){
-    		nextHeader->WriteBack(nextHeaderID);
-    	}*/
-
-    	
     }
 
 
@@ -167,7 +157,7 @@ FileHeader::FetchFrom(int sector)
 	offset += sizeof(nextHeaderID);
 	memcpy(dataSectors, buf + offset, NumDirect * sizeof(int));
 	//FileHeader* hdr = new FileHeader;
-	if(0 <= nextHeaderID && nextHeaderID <1024){
+	if(nextHeaderID != -1){
 		nextHeader = new FileHeader;
     	//cout << "FetchFrom: next header id = " << nextHeaderID <<"\n";
 
@@ -241,7 +231,7 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
-	/* MP4 */
+	// MP4 modified
 	int index = offset / SectorSize;
 	if(index >= NumDirect)
 		return nextHeader->ByteToSector(offset - MaxFileSize);
@@ -293,7 +283,7 @@ FileHeader::Print()
         printf("\n");
     }
 
-	/* MP4 */
+	// MP4 modified
 	if(nextHeader != NULL)
 		nextHeader->Print();
 
