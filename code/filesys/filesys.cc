@@ -180,6 +180,11 @@ FileSystem::~FileSystem()
 //	"name" -- name of file to be created
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
+bool
+FileSystem::Create(char *name, int initialSize){
+    
+}
+
 
 bool
 FileSystem::Create(char *name, int initialSize)
