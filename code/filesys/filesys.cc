@@ -240,7 +240,7 @@ FileSystem::Create(char *pathname, int initialSize)
     DEBUG(dbgFile, "Creating file " << pathname << " size " << initialSize);
 
     directory = new Directory(NumDirEntries);
-    directory->FetchFrom(directoryFile);
+    //directory->FetchFrom(directoryFile);
 
     /* MP4 */
     /* Find the directory containing the target file */
