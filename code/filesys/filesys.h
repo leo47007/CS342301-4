@@ -79,7 +79,8 @@ class FileSystem {
 	// MP4 mod tag
 	~FileSystem();
 
-    bool Create(char *name, int initialSize);  	
+    bool Create(char *pathname, int initialSize); 
+    bool CreateDirectory(char *pathname);	
 					// Create a file (UNIX creat)
 
     OpenFile* Open(char *name); 	// Open a file (UNIX open)
